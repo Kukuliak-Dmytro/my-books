@@ -1,19 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Comfortaa } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import { ModeToggle } from "@/components/ui/theme-switcher";
-import Header
- from "@/components/layout/Header";
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+import Header from "@/components/layout/Header";
+
+const comfortaa = Comfortaa({
+  variable: "--font-comfortaa",
   subsets: ["latin"],
+  weight: ["600"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -28,12 +25,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${comfortaa.className} antialiased flex min-h-screen flex-col items-center justify-center`}
       >
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <Header />
           {children}
-          <ModeToggle />
         </ThemeProvider>
       </body>
     </html>
