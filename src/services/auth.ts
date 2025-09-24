@@ -19,3 +19,7 @@ export async function loginUser(email: string, password: string) {
     localStorage.setItem('refreshToken', response.data.refreshToken);
     return response.data;
 }
+export async function verifyToken(token: string) {
+    const response = await apiClient.post('/auth/verify', { token });
+    return response.data;
+}

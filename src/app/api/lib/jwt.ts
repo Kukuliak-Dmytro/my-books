@@ -91,7 +91,7 @@ export async function generateTokenPair(userData: UserData): Promise<{accessToke
   }
 }
 
-export function decode(token: string): Promise<JWTPayload> {
+export function verifyToken(token: string): Promise<JWTPayload> {
   return new Promise((resolve, reject) => {
     jwt.decode(JWT_SECRET, token, (err?: Error, payload?: any) => {
       if (err) {
