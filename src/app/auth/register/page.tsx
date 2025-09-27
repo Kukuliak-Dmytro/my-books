@@ -6,6 +6,7 @@ import  Form from "next/form"
 import Link from "next/link"
 import { registerUser } from "@/services/auth"
 import { useForm, SubmitHandler } from "react-hook-form"
+import { redirect } from "next/navigation"
 type Inputs = {
   full_name: string
   email: string
@@ -21,8 +22,12 @@ export default function Register(){
     watch,
     formState: { errors },
   } = useForm<Inputs>()
-  const onSubmit: SubmitHandler<Inputs> = (data) => registerUser(data.full_name, data.email, data.password)
-  
+  const onSubmit: SubmitHandler<Inputs> = (data) => {
+    registerUser(data.full_name, data.email, data.password)
+    redirect("/")
+
+  }
+
     return(
       <section className="p-6 flex flex-col gap-6 shadow-double rounded-lg w-[400px]" >
         <h1>Register</h1>

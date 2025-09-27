@@ -6,6 +6,9 @@ import  Form from "next/form"
 import Link from "next/link"
 import { loginUser } from "@/services/auth"
 import { useForm, SubmitHandler } from "react-hook-form"
+import { useEffect } from "react"
+import { verifyToken } from "@/services/auth"
+import { redirect } from "next/navigation"
 type Inputs = {
   email: string
   password: string
@@ -16,11 +19,12 @@ export default function Login(){
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<Inputs>()
-  const onSubmit: SubmitHandler<Inputs> = (data) => loginUser(data.email, data.password)
-  
+  const onSubmit: SubmitHandler<Inputs> = (data) => {
+    loginUser(data.email, data.password)
+   redirect("/")
+  }
     return(
       <section className="p-6 flex flex-col gap-6 shadow-double rounded-lg w-[400px]" >
         <h1>Login</h1>
