@@ -1,6 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import { verifyToken } from "@/services/auth";
+import {
+  QueryClient,
+  QueryClientProvider,
+
+} from '@tanstack/react-query'
 const AuthGuard = ({ children }: { children: React.ReactNode }) => {
     const [isAuth, setIsAuth] = useState(false);
     useEffect(() => {
@@ -35,8 +40,10 @@ export default function HomeLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <AuthGuard>
-      {children}
-    </AuthGuard>
+    <QueryClientProvider client={new QueryClient()}>
+      <AuthGuard>
+        {children}
+      </AuthGuard>
+    </QueryClientProvider>
   );
 }

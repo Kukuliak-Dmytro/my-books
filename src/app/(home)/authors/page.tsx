@@ -11,18 +11,24 @@ import { Calendar } from "@/components/ui/calendar"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
 } from "@/components/ui/popover"
 import { Textarea } from "@/components/ui/textarea"
 import { useState } from "react"
 import { ChevronDownIcon } from "lucide-react"
 import { useForm, SubmitHandler, Controller } from "react-hook-form"
-
+import { createAuthor } from "@/services/author"
+import { useAuthors } from "@/services/author"
+import ReusableList from "@/components/layout/ReusableList"
+import AuthorCard from "@/components/cards/AuthorCard"
+import { useQueryClient } from "@tanstack/react-query"
 export default function AuthorsPage() {
     const [open, setOpen] = useState(false)
-    
+    const { data: authors, isLoading, error, isFetching } = useAuthors()
+    const queryClient = useQueryClient()
+
     type Inputs = {
         authorName: string
         dateOfBirth: string | undefined // Store as YYYY-MM-DD string
@@ -39,16 +45,21 @@ export default function AuthorsPage() {
 
     const selectedDateString = watch("dateOfBirth")
     const selectedDate = selectedDateString ? new Date(selectedDateString) : undefined
-    
-    const onSubmit: SubmitHandler<Inputs> = (data) => {
+
+    const onSubmit: SubmitHandler<Inputs> = async (data) => {
         console.log(data)
-        // Handle form submission here
+        const author = await createAuthor({
+            full_name: data.authorName,
+            dob: data.dateOfBirth!,
+            description: data.biography
+        })
+        console.log('Author created:', author)
+        queryClient.refetchQueries({ queryKey: ['authors'] })
     }
 
     return (
         <Section>
             <h1>Authors</h1>
-            <p>List of authors will be displayed here.</p>
             <Accordion type="single" collapsible>
                 <AccordionItem value="item-1">
                     <AccordionTrigger><h3>Create Author</h3></AccordionTrigger>
@@ -56,18 +67,18 @@ export default function AuthorsPage() {
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                             <div>
                                 <Label className='pl-2 mb-1 text-sm' htmlFor="authorName">Author Name</Label>
-                                <Input 
-                                    id="authorName" 
-                                    placeholder="Author name" 
-                                    {...register("authorName", { 
-                                        required: "Author name is required" 
+                                <Input
+                                    id="authorName"
+                                    placeholder="Author name"
+                                    {...register("authorName", {
+                                        required: "Author name is required"
                                     })}
                                 />
                                 {errors.authorName && (
                                     <p className="text-sm text-red-500 mt-1">{errors.authorName.message}</p>
                                 )}
                             </div>
-                            
+
                             <div className="flex flex-col gap-3">
                                 <Label htmlFor="date" className="px-1">
                                     Date of birth
@@ -117,9 +128,9 @@ export default function AuthorsPage() {
 
                             <div>
                                 <Label htmlFor="biography" className="pl-2 mb-1 text-sm">Biography</Label>
-                                <Textarea 
-                                    id="biography" 
-                                    placeholder="Author biography" 
+                                <Textarea
+                                    id="biography"
+                                    placeholder="Author biography"
                                     {...register("biography", {
                                         required: "Biography is required"
                                     })}
@@ -134,6 +145,19 @@ export default function AuthorsPage() {
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
+            <div className="mt-8 mb-4 flex justify-between items-center">
+                <p>List of authors will be displayed here.</p>
+                <Button type='button' onClick={() => queryClient.invalidateQueries({ queryKey: ['authors'] })} className='w-[150px]'>{isFetching ? "Loading..." : "Refresh"}</Button>
+            </div>
+
+            <ReusableList
+                items={authors || []}
+                CardComponent={AuthorCard}
+                error={error}
+                isLoading={isLoading}
+                getKey={(author) => author.id}
+            />
+
         </Section>
     )
 }
