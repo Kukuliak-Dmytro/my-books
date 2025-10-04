@@ -117,3 +117,53 @@ export function verifyToken(token: string): Promise<JWTPayload> {
     });
   });
 }
+
+// Helper function for standardized JWT verification in API routes
+export async function verifyAuthHeader(authHeader: string | null): Promise<
+  | { success: true; payload: JWTPayload }
+  | { success: false; status: number; error: string; message: string }
+> {
+  if (!authHeader?.startsWith('Bearer ')) {
+    return {
+      success: false,
+      status: 401,
+      error: "Unauthorized",
+      message: 'Missing or invalid authorization header'
+    };
+  }
+
+  const token = authHeader.substring(7);
+
+  try {
+    const decodedToken = await verifyToken(token);
+    return {
+      success: true,
+      payload: decodedToken
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Token verification failed';
+    
+    if (errorMessage.includes('expired')) {
+      return {
+        success: false,
+        status: 401,
+        error: "Token Expired",
+        message: 'Your session has expired. Please log in again.'
+      };
+    } else if (errorMessage.includes('Invalid token')) {
+      return {
+        success: false,
+        status: 401,
+        error: "Invalid Token",
+        message: 'Invalid authentication token.'
+      };
+    } else {
+      return {
+        success: false,
+        status: 401,
+        error: "Unauthorized",
+        message: 'Authentication failed.'
+      };
+    }
+  }
+}

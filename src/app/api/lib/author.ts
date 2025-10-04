@@ -28,3 +28,16 @@ export async function getAllAuthors(): Promise<Author[]> {
         throw new Error('Database error while fetching authors');
     }
 }
+
+export async function searchAuthors(query: string): Promise<Author[]> {
+    try {
+        const result = await connectionPool.query(
+            'SELECT * FROM authors WHERE LOWER(full_name) LIKE LOWER($1) ORDER BY full_name ASC LIMIT 20',
+            [`%${query}%`]
+        );
+        return result.rows;
+    } catch (error: unknown) {
+        console.error('Error searching authors:', error);
+        throw new Error('Database error while searching authors');
+    }
+}
